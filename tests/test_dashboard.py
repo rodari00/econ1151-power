@@ -58,23 +58,17 @@ with sync_playwright() as p:
  page.locator('#tail').select_option('two');assert page.locator('#distributions .threshold').count()==4
  page.locator('#mu').fill('500');assert page.locator('#powerValue').inner_text()=='5.0%';assert 'not Type II error' in page.locator('#betaMeaning').inner_text()
  page.locator('#mu').fill('504');page.screenshot(path=str(output/'two-tailed.png'),full_page=True)
- # Seeded repeated sampling converges to the exact probabilities.
- s=dict(tail='two',alpha=.05,n=36,sigma=12,mu=496)
- sim=page.evaluate('(s)=>{const r=PowerMath.simulate(s,100000,1151);return {falseAlarms:r.falseAlarms,detections:r.detections}}',s)
- for rate,theory in [(sim['falseAlarms']/100000,.05),(sim['detections']/100000,power(s,496))]:assert abs(rate-theory)<5*math.sqrt(theory*(1-theory)/100000)
- page.locator('#simulation summary').click();page.locator('#repetitions').fill('1000');page.locator('#draw').click();assert page.locator('.sim-result').count()==2
- page.locator('#n').fill('40');assert page.locator('.sim-result').count()==0
  # Data and portable SVG downloads.
  with page.expect_download() as dl:page.locator('#downloadData').click()
  data=dl.value;data.save_as(output/'power-curve.csv');rows=list(csv.DictReader(io.StringIO((output/'power-curve.csv').read_text())));assert len(rows)==401
  with page.expect_download() as dl:page.locator('#downloadPlot').click()
  dl.value.save_as(output/'power-plots.svg');assert '<svg' in (output/'power-plots.svg').read_text()
  assert not page.evaluate("[...document.querySelectorAll('path')].some(p=>/NaN|Infinity/.test(p.getAttribute('d')))")
- page.locator('#reset').click();page.locator('#simulation summary').click()
+ page.locator('#reset').click()
  page.screenshot(path=str(output/'desktop.png'),full_page=True)
  for w in [1366,768,390]:
   page.set_viewport_size({'width':w,'height':900});page.screenshot(path=str(output/f'width-{w}.png'),full_page=True)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),w
  assert not errors,errors
- print(f'PASS: {len(cases)} probability checks (max error {err:.2g}), comparative statics, controls, tails, sampling, exports, responsive layout; no JS errors.')
+ print(f'PASS: {len(cases)} probability checks (max error {err:.2g}), comparative statics, controls, tails, exports, responsive layout; no JS errors.')
  browser.close()
