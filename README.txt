@@ -9,7 +9,7 @@ Controls
 - Lower-, upper-, or two-tailed alternative.
 - True mean used to calculate power (mu_Ha), alpha, sample size n, and
   known population standard deviation sigma_X. Each has a slider and
-  numeric entry. n is bottles per sample, not the number of repetitions.
+  numeric entry. n is bottles per sample.
 - True means lie on the selected alternative's side; the boundary 500
   is included to show rejection probability = alpha under H0.
 - Default: lower-tailed, mu_Ha=496, alpha=.05, n=36, sigma_X=12.
@@ -39,8 +39,6 @@ Suggested classroom sequence
 4. Reset. Lower sigma_X, then reset and lower alpha. Compare each change.
 5. Change mu_Ha: the point moves along the existing power curve.
 6. Select two-tailed. Both rejection tails contribute to power.
-7. Open Try repeated samples. Increasing repetitions stabilizes estimated
-   rates; it does not change the sampling SE or theoretical power.
 
 Mathematics
 Assume iid normal fills with known sigma_X, identical under both means.
@@ -56,13 +54,6 @@ Power at true mean m is respectively:
 Beta = 1 - power, provided m is in Ha. At m=500, the dashboard explicitly
 identifies the rates as rejection and non-rejection under H0.
 
-Repeated samples use independent normal sample means with mean m and SD
-SE. This is exactly the distribution of the average of n iid normal
-bottle fills; drawing n individual fills is not needed. Seeded xorshift32
-uniform draws and Box-Muller transforms produce reproducible experiments.
-Each click advances the seed. Monte Carlo SE is sqrt(p(1-p)/B).
-Theoretical curves do not change when B (repetitions) changes.
-
 References
 NIST, known-SD mean tests:
 https://itl.nist.gov/div898/handbook/prc/section2/prc.htm
@@ -75,14 +66,19 @@ Verification
 2026-11-18: 567 parameter combinations checked against Python NormalDist
 and math.erfc; maximum absolute probability difference 5.3e-8. Checked
 power at H0, comparative statics, boundary input handling, tail switches,
-comparison pin/reset, repeated sampling (100,000 samples per population),
+comparison pin/reset,
 CSV/SVG downloads, no browser JavaScript errors, and responsive layouts
 at 1512, 1366, 768 and 390 pixels. Screenshots inspected.
 Run tests/test_dashboard.py with Python and Playwright installed.
 CHROME_PATH optionally selects a local Chrome/Chromium executable.
 The tests use a fresh headless profile; no personal browser data is used.
 
+2026-11-18 simplification: removed the repeated-sampling and calculation
+explanation panels; parameter symbols use parentheses; assumptions are
+bullets. The null and alternative densities remain in aligned panels.
+
 GitHub Pages deployment
+Live site: https://rodari00.github.io/econ1151-power/
 Repository: https://github.com/rodari00/econ1151-power
 The included .github/workflows/pages.yml deploys the main branch.
 Select GitHub Actions as the publishing source in Settings > Pages.

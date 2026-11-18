@@ -3,7 +3,7 @@
 'use strict';
 const M=PowerMath,$=id=>document.getElementById(id);
 const defaults={tail:'lower',mu:496,alpha:.05,n:36,sigma:12};
-let state={...defaults},baseline={...defaults},view=null,seed=1151,simulation=null;
+let state={...defaults},baseline={...defaults},view=null;
 const C={null:'#80273f',alpha:'#ad455f',beta:'#c59a43',power:'#2e8279',saved:'#797979'};
 const fmt=(n,d=2)=>Number(n).toFixed(d),pct=n=>(100*n).toFixed(1)+'%';
 const short=n=>Number(n.toFixed(2)).toString();
@@ -83,7 +83,6 @@ function render(){
  $('betaMeaning').textContent=atNull?'At H₀: non-rejection, not Type II error':`Fail to reject when μ = ${short(state.mu)}`;
  $('powerMeaning').textContent=atNull?'At H₀: rejection rate equals α':`Reject when μ = ${short(state.mu)}`;
  renderDistributions(q);renderPower(q);
- simulation=null;$('simulationResult').textContent='Each sample contains n bottles. More repeated samples make the estimated rates more stable; they do not change theoretical power.';
 }
 function sync(){
  $('tail').value=state.tail;
@@ -107,16 +106,9 @@ $('tail').addEventListener('change',e=>{
  if(state.tail==='lower')state.mu=500-effect;if(state.tail==='upper')state.mu=500+effect;
  baseline={...state};view=null;sync();render();
 });
-$('reset').addEventListener('click',()=>{state={...defaults};baseline={...defaults};view=null;seed=1151;$('repetitions').value=2000;$('repsValue').value='2,000';sync();render();});
+$('reset').addEventListener('click',()=>{state={...defaults};baseline={...defaults};view=null;sync();render();});
 $('fit').addEventListener('click',()=>renderDistributions(M.quantities(state),true));
 $('pin').addEventListener('click',()=>{baseline={...state};renderPower(M.quantities(state));});
-$('repetitions').addEventListener('input',()=>{$('repsValue').value=(+$('repetitions').value).toLocaleString();simulation=null;$('simulationResult').textContent='Select “Draw samples” to run with this number of repeated samples.';});
-$('draw').addEventListener('click',()=>{
- const B=+$('repetitions').value,q=M.quantities(state);simulation=M.simulate(state,B,seed++);
- const {falseAlarms,detections}=simulation;
- function result(title,k,theory,col){return `<div class="sim-result"><strong>${title}</strong><div class="bar"><span style="width:${100*k/B}%;background:${col}"></span></div>${k.toLocaleString()} of ${B.toLocaleString()} samples reject H₀.<br>Simulated: <b>${pct(k/B)}</b> · Theoretical: ${pct(theory)}<div class="sim-meta">Monte Carlo SE ≈ ${(100*Math.sqrt(theory*(1-theory)/B)).toFixed(2)} percentage points.</div></div>`;}
- $('simulationResult').innerHTML='<div class="sim-results">'+result('When μ = 500: false alarms',falseAlarms,state.alpha,C.alpha)+result(`When μ = ${short(state.mu)}: ${state.mu===500?'false alarms':'detections'}`,detections,q.power,C.power)+'</div><p class="hint">New independent samples are drawn each time. The normal curves and their shaded probabilities do not depend on the number of repetitions.</p>';
-});
 function download(data,type,name){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('downloadData').addEventListener('click',()=>{
  const rows=['effect_size_ml,true_mean_ml,current_power,saved_power,tail,alpha,n,sigma_x,saved_alpha,saved_n,saved_sigma_x'];

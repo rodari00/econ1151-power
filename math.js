@@ -35,17 +35,5 @@
   }
   function powerAtEffect(s,effect){return probability(s,MU0+(s.tail==='upper'?1:-1)*effect);}
   function quantities(s){const t=thresholds(s),power=probability(s,s.mu);return {...t,power,beta:1-power,effect:Math.abs(s.mu-MU0)};}
-  const reject=(x,t)=>x<t.lo||x>t.hi;
-  function simulate(s,repetitions,seed){
-    const t=thresholds(s);let state=seed>>>0||1;
-    const uniform=()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return ((state>>>0)+.5)/4294967296;};
-    const normal=()=>Math.sqrt(-2*Math.log(uniform()))*Math.cos(2*Math.PI*uniform());
-    const nullMeans=[],altMeans=[];let falseAlarms=0,detections=0;
-    for(let i=0;i<repetitions;i++){
-      const x=MU0+t.se*normal(),y=s.mu+t.se*normal();nullMeans.push(x);altMeans.push(y);
-      falseAlarms+=reject(x,t);detections+=reject(y,t);
-    }
-    return {nullMeans,altMeans,falseAlarms,detections,repetitions,seed};
-  }
-  root.PowerMath={MU0,cdf,sf,quantile,density,thresholds,probability,powerAtEffect,quantities,reject,simulate};
+  root.PowerMath={MU0,cdf,sf,quantile,density,thresholds,probability,powerAtEffect,quantities};
 })(globalThis);
